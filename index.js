@@ -12,7 +12,7 @@ app.use(express.json())
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.stv3jdc.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -52,12 +52,27 @@ async function run() {
     // get carts
 
     app.get('/carts', async(req,res)=>{
-      const email = req.query.email;
-      const query = {email: email} 
+      let query = {}
+        if(req.query?.email){
+            query = {email: req.query.email}
+        }
       const cursor = cartsCollection.find(query)
       const result = await cursor.toArray()
       res.send(result)
     })
+
+     // delete carts
+
+    app.delete('/carts/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await cartsCollection.deleteOne(query)
+      res.send(result)
+      console.log(id)
+    })
+
+ 
+
 
     // post carts
 
@@ -67,6 +82,21 @@ async function run() {
       res.send(result)
     })
 
+  //   app.delete('/carts/:id', async(req,res)=>{
+  //     const id  = req.params.id;
+  //     const query ={_id: new ObjectId(id)}
+  //     const result = await cartsCollection.deleteOne(query);
+  //     res.send(result)
+  // })
+
+  // app.delete('/carts/:id', async(req,res)=>{
+  //   const id = req.params.id;
+  //   const query = {_id: new ObjectId(id)}
+  //   const result = await cartsCollection.deleteOne(query)
+  //   res.send(result)
+  // })
+
+   
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
