@@ -230,7 +230,12 @@ async function run() {
         amount: amount,
         currency: 'usd',
         payment_mathod_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
       })
+
     })
 
    
