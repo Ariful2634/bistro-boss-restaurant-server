@@ -173,9 +173,6 @@ async function run() {
       const query = {_id: (id)}
       const result = await menuCollection.deleteOne(query)
       res.send(result)
-      // console.log(id)
-      // console.log(result)
-      // console.log(query)
     })
 
 
