@@ -45,6 +45,8 @@ async function run() {
       res.send({token})
     })
 
+
+
     // middleware
     const verifyToken = (req,res,next)=>{
       console.log('inside verify token',req.headers.authorization)
@@ -61,6 +63,8 @@ async function run() {
       })
     }
 
+
+
     // use verify admin after verify token
 
    const verifyAdmin = async (req,res,next)=>{
@@ -74,6 +78,8 @@ async function run() {
     next()
    }
 
+
+
     // user related
 
 
@@ -82,6 +88,8 @@ async function run() {
       const result = await usersCollection.find().toArray()
       res.send(result)
     })
+
+
 
     // check user admin or not
 
@@ -100,6 +108,8 @@ async function run() {
       res.send({admin})
     })
 
+
+
     app.patch('/users/admin/:id', verifyToken,verifyAdmin, async(req,res)=>{
       const id = req.params.id;
       const filter = {_id: new ObjectId(id)}
@@ -112,12 +122,16 @@ async function run() {
       res.send(result)
     })
 
+
+
     app.delete('/users/:id', verifyToken, verifyAdmin, async(req,res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const result = await usersCollection.deleteOne(query)
       res.send(result)
     })
+
+
 
     app.post('/users', async(req,res)=>{
       const user = req.body;
@@ -142,6 +156,16 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+
+    // post menu
+
+    app.post('/menu', verifyToken,verifyAdmin, async(req,res)=>{
+      const item = req.body;
+      const result = await menuCollection.insertOne(item)
+      res.send(result)
+    })
+
+
     // get review
 
     app.get('/review', async(req,res)=>{
