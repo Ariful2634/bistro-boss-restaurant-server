@@ -35,9 +35,10 @@ async function run() {
     const reviewCollection = client.db("restaurantDB").collection('review')
     const cartsCollection = client.db("restaurantDB").collection('carts')
     const usersCollection = client.db("restaurantDB").collection('users')
+    const paymentCollection = client.db("restaurantDB").collection('payments')
 
 
-    // jwt related api
+    // jwt relatepayment
 
     app.post('/jwt', async(req,res)=>{
     
@@ -224,17 +225,41 @@ async function run() {
 
     app.post('/create-payment-intent', async(req,res)=>{
       const {price}=req.body;
+      if (isNaN(price) || price <= 0) {
+        return res.status(400).json({ error: 'Invalid or missing price value.' });
+      }
       const amount = parseInt(price*100)
+      console.log(amount)
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'usd',
-        payment_mathod_types: ['card']
+        payment_method_types: ['card']
       });
 
       res.send({
         clientSecret: paymentIntent.client_secret
       })
+
+    })
+
+    // save payment and delete items from the cart
+
+    app.post('/payments', async(req,res)=>{
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment)
+
+      // carefully delete each item from the cart
+
+      console.log('payment info', payment)
+      const query = { _id: {
+        $in: payment.cardIds.map(id=> new ObjectId(id))
+
+      }};
+
+      const deleteResult = await cartsCollection.deleteMany(query)
+
+      res.send({paymentResult, deleteResult })
 
     })
 
